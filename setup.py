@@ -37,10 +37,10 @@ setup(
     extras_require={
         'test': ['pytest'],
     },
-    data_files=[
-        ('bok', ['grammar.g']),
-    ],
-    package_data={
-        'lib': ['examples.bok', 'std.bok'],
+    data_files={
+        'bok': ['grammar.g'],
     },
+    package_data=[
+        ('lib', ['examples.bok', 'std.bok']),
+    ],
 )
