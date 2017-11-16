@@ -5,9 +5,9 @@
         :alt: Bok Logo
         :align: center
 
-
+================
 The Bok Language
-################
+================
 
 Bok is a dynamic, concatenative programming language.
 Inspired by `Joy <http://www.latrobe.edu.au/humanities/research/research-projects/past-projects/joy-programming-language>`_, expressions are written with postfix notation and without formal parameters.
