@@ -4,9 +4,9 @@
     :align: center
 
 
-----------------
+================
 The Bok Language
-----------------
+================
 
 Bok is a dynamic, concatenative programming language.
 Inspired by `Joy <http://www.latrobe.edu.au/humanities/research/research-projects/past-projects/joy-programming-language>`_, expressions are written with postfix notation and without formal parameters.
@@ -24,45 +24,50 @@ Installation
 ************
 Install with pip by running:
 
-::
+.. code-block::
 
     pip install git+https://github.com/autocorr/bok.git
 
 Or from the source with:
 
-::
+.. code-block::
 
     python setup.py install
 
-.. table:: Dependencies
-    :widths: auto
+Requirements
+************
+``numpy`` is required for array literals and operations, but is otherwise
+optional.
 
-    ============== =====
-    numpy              ?
+.. code-block::
     termcolor          ?
     lark-parser        ?
     prompt_toolkit     ?
     pygments           ?
-    ============== =====
+    numpy (optional)   ?
 
 Getting Started
 ***************
-::
+
+.. code-block::
 
     $ python3 -m bok.repl
-    Bok 0.1, type 'help <word>' for help.
+    Bok 0.1, type '[<word>] help' for help.
     Hit CTRL+D or type "exit" to quit.
      « # This is a comment
-     « # Expressions are evaluated with postfix notation
+     « # Literals are pushed onto the stack and operated on by functions
      « "Hello, World!" println
     Hello, World!
-     « # Define functions with ( and )
+     « # Functions are defined with ( and )
      « ( think  "." print )
-     « [think] 10 * apply
+     « # Lists can be used to quote expresions
+     « [think] 10 * eval
     ..........
      « ( lfive  [5 <=] [error] ["greater than five" println] if )
-     « [5 lfive] ["We caught an error" println] try
-    We caught an error
+     « 4 lfive
+    Error: Raised an explicit error.
+    Stack dumped
+     « # Numpy functions can be called with @
      « 5 @arange dup @cumsum stack
      # [type]    : [value]
      - ndarray   : [ 0  1  3  6 10]
