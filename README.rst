@@ -40,6 +40,7 @@ Requirements
 optional.
 
 .. code-block::
+
     termcolor          ?
     lark-parser        ?
     prompt_toolkit     ?
