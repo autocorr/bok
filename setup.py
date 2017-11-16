@@ -41,6 +41,6 @@ setup(
         'bok': ['grammar.g'],
     },
     data_files=[
-        ('lib', ['examples.bok', 'std.bok']),
+        ('lib', ['lib/*.bok']),
     ],
 )
