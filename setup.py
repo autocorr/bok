@@ -36,7 +36,7 @@ setup(
     python_requires='>=3',
     extras_require={
         'test': ['pytest'],
-    }
+    },
     data_files=[
         ('lib', ['lib/std.bok']),
     ],
