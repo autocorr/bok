@@ -38,9 +38,9 @@ setup(
         'test': ['pytest'],
     },
     data_files=[
-        ('lib', ['lib/std.bok']),
+        ('bok', ['grammar.g']),
     ],
     package_data={
-        'lib': 'std.bok',
+        'lib': ['examples.bok', 'std.bok'],
     },
 )
