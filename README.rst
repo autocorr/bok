@@ -22,7 +22,7 @@ Because the runtime is written in pure Python, it is quite slow, but I suppose i
 Bok is named after the astronomer `Bart Bok <https://en.wikipedia.org/wiki/Bart_Bok>`_ who was a pioneer in the study of the Milky Way and discoverer of `Bok globules <https://en.wikipedia.org/wiki/Bok_globule>`_.
 
 Installation
-============
+------------
 Install with pip by running:
 
 .. code-block::
@@ -36,7 +36,7 @@ Or from the source with:
     python setup.py install
 
 Requirements
-============
+------------
 The parser makes use of `Lark <https://github.com/erezsh/lark>`_ to generate rules from an `EBNF <https://en.wikipedia.org/wiki/Extended_Backus%E2%80%93Naur_form>`_ grammar, which for Bok is written in `grammar.g <https://github.com/autocorr/bok/blob/master/bok/grammar.g>`_.
 ``prompt_toolkit`` and ``pygments`` are use to create the REPL and provide syntax highlighting, respectively.
 ``numpy`` is required for array literals and operations, but is otherwise
@@ -51,7 +51,7 @@ optional.
     numpy (optional)   ?
 
 Getting Started
-===============
+---------------
 
 .. code-block::
 
@@ -86,7 +86,7 @@ Getting Started
     Do you really want to exit ([y]/n)? y
 
 License
-=======
+-------
 Copyright 2017, Brian Svoboda.
 This is free software and released under the GNU General Public License (version 3).
 
