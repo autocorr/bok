@@ -1,0 +1,7 @@
+The images in this directory are released to the Public Domain.
+
+The icons show an image of Thackeray's Globules, a set of Bok globules in the
+H II region IC 2944, taken with the WFPC2 instrument on the Hubble Space
+Telescope. The original Public Domain image may be found on Wikimedia at:
+
+https://upload.wikimedia.org/wikipedia/commons/f/f9/Bok_globules_in_IC2944.jpg

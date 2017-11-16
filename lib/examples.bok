@@ -1,0 +1,32 @@
+# Bok examples
+
+# Canonical Hello, World!
+( greet  "Hello, World!" println )
+
+# Square a number by duplicating it onto stack and multiplying
+( square  dup * )
+
+# Double a number if it is greater than two, otherwise negate it
+( dub_or_neg  [[2 >] [2 *] [negate] if] map )
+
+# Raise an assertion error if the value on top of the stack is not equal to 2.
+( assert_two  2 == assert )
+
+# Raise an explicit error if the value on top of the stack is greater than 4
+( raise_err  [4 >] [error] ["less than five, a-ok!" println] if )
+
+# Similar functions can be grouped into namespaces.
+( area
+  3.14159:pi  2:two
+  ( circle  dup * const.pi * )
+  ( square  dup * )
+  ( triangle  * const.two / )
+)
+
+# Explicit recursion is possible through self-reference, but limited in the
+# same way as Python by a finite call-stack.
+( factorial_naive  [0 >] [dup 1 - factorial_naive *] [drop 1] if )
+
+# Recursion through a combinator, in this case `linrec` is not limited.
+( factorial  [1 <] [drop 1] [dup 1 -] [*] linrec )
+
