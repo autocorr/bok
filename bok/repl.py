@@ -116,7 +116,7 @@ def bok_prompt(machine):
 
 
 def repl():
-    print('Bok 0.1, type "help" for help.')
+    print('Bok 0.1, type "[<word>] help" for help.')
     print('Hit CTRL+D or type "exit" to quit.')
     red_err = colored('Error:', 'red')
     m = Machine()
