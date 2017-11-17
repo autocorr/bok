@@ -8,7 +8,7 @@ Bok is a dynamic, concatenative programming language.
     :alt: Bok Logo
     :align: center
 
-Inspired by `Joy <http://www.latrobe.edu.au/humanities/research/research-projects/past-projects/joy-programming-language>`_, expressions manipulate a stack and are written with postfix notation without formal parameters.
+Inspired by `Joy <http://www.latrobe.edu.au/humanities/research/research-projects/past-projects/joy-programming-language>`_, expressions manipulate a stack and are written in postfix notation without formal parameters.
 Lexical scoping is included, so that functions and variables can be grouped together into namespaces and closures, similar to `Reforth <https://github.com/seanpringle/reforth>`_.
 The Bok interpreter is written in Python and has a natural interface for calling Python objects and ``numpy`` arrays.
 Bok also comes with a full-featured REPL based on `python-prompt-toolkit <https://github.com/jonathanslenders/python-prompt-toolkit/>`_ that includes autocompletion, syntax highlighting, multiline input, history, and a toolbar visualizing the stack.
