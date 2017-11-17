@@ -1,23 +1,21 @@
-.. class:: no-web
-
-    .. image:: https://raw.githubusercontent.com/autocorr/bok/master/icons/logo_256.png
-        :target: https://github.com/autocorr/bok
-        :alt: Bok Logo
-        :align: center
-
 ================
 The Bok Language
 ================
-
 Bok is a dynamic, concatenative programming language.
-Inspired by `Joy <http://www.latrobe.edu.au/humanities/research/research-projects/past-projects/joy-programming-language>`_, expressions are written with postfix notation and without formal parameters.
-Full lexical scoping is included, so that functions and variables can be grouped together into namespaces, similar to `Reforth <https://github.com/seanpringle/reforth>`_.
+
+.. image:: https://raw.githubusercontent.com/autocorr/bok/master/icons/logo_256.png
+    :target: https://github.com/autocorr/bok
+    :alt: Bok Logo
+    :align: center
+
+Inspired by `Joy <http://www.latrobe.edu.au/humanities/research/research-projects/past-projects/joy-programming-language>`_, expressions manipulate a stack and are written with postfix notation without formal parameters.
+Lexical scoping is included, so that functions and variables can be grouped together into namespaces and closures, similar to `Reforth <https://github.com/seanpringle/reforth>`_.
 The Bok interpreter is written in Python and has a natural interface for calling Python objects and ``numpy`` arrays.
 Bok also comes with a full-featured REPL based on `python-prompt-toolkit <https://github.com/jonathanslenders/python-prompt-toolkit/>`_ that includes autocompletion, syntax highlighting, multiline input, history, and a toolbar visualizing the stack.
 
 Documentation on Bok may be found at `ReadTheDocs <https://bok.readthedocs.io>`_, in the ``docs/`` directory of this repository, and within the interpreter through the "help" function.
 
-This is a hobby project designed for exploring programming language concepts and software development practices.
+This is a hobby project designed for exploring programming language concepts and practices in software development.
 Because the runtime is written in pure Python, it is quite slow, but I suppose if you're using Python in the first place, what's another factor of twenty slower? :)
 Bok is named after the astronomer `Bart Bok <https://en.wikipedia.org/wiki/Bart_Bok>`_ who was a pioneer in the study of the Milky Way and discoverer of `Bok globules <https://en.wikipedia.org/wiki/Bok_globule>`_.
 
@@ -37,7 +35,7 @@ Or from the source with:
 
 Requirements
 ------------
-The parser makes use of `Lark <https://github.com/erezsh/lark>`_ to generate rules from an `EBNF <https://en.wikipedia.org/wiki/Extended_Backus%E2%80%93Naur_form>`_ grammar, which for Bok is written in `grammar.g <https://github.com/autocorr/bok/blob/master/bok/grammar.g>`_.
+The interpreter makes use of `Lark <https://github.com/erezsh/lark>`_ to generate a parser from an `EBNF <https://en.wikipedia.org/wiki/Extended_Backus%E2%80%93Naur_form>`_ grammar, which for Bok is defined in `grammar.g <https://github.com/autocorr/bok/blob/master/bok/grammar.g>`_.
 ``prompt_toolkit`` and ``pygments`` are use to create the REPL and provide syntax highlighting, respectively.
 ``numpy`` is required for array literals and operations, but is otherwise
 optional.
