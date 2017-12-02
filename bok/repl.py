@@ -79,7 +79,7 @@ def get_bindings():
             else:
                 buf.insert_text(r_symb)
                 buf.cursor_right(count=1)
-    parens = [('(', ')'), ('[', ']')]
+    parens = [('(', ')'), ('[', ']'), ('{', '}')]
     for pair in parens:
         insert_pair(*pair)
         insert_spaced_pair(*pair)

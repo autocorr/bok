@@ -37,16 +37,15 @@ Requirements
 ------------
 The interpreter makes use of `Lark <https://github.com/erezsh/lark>`_ to generate a parser from an `EBNF <https://en.wikipedia.org/wiki/Extended_Backus%E2%80%93Naur_form>`_ grammar, which for Bok is defined in `grammar.g <https://github.com/autocorr/bok/blob/master/bok/grammar.g>`_.
 ``prompt_toolkit`` and ``pygments`` are use to create the REPL and provide syntax highlighting, respectively.
-``numpy`` is required for array literals and operations, but is otherwise
-optional.
+``numpy`` is required for array literals and operations.
 
 .. code-block::
 
-    termcolor          ?
-    lark-parser        ?
-    prompt_toolkit     ?
-    pygments           ?
-    numpy (optional)   ?
+    termcolor        ?
+    lark-parser      ?
+    prompt_toolkit   ?
+    pygments         ?
+    numpy            ?
 
 Getting Started
 ---------------

@@ -7,9 +7,6 @@ from collections import deque, Iterable
 from termcolor import colored
 
 
-PYLOCALS = {}
-
-
 class RaisedError(Exception):
     pass
 
@@ -23,8 +20,25 @@ class Stack(deque):
     push = deque.append
     pushleft = deque.appendleft
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.pylocals = {}
+        self.args = []
+        self.kwargs = {}
+
+    @property
+    def args_loaded(self):
+        return self.args or self.kwargs
+
+    def clear_args(self):
+        self.args.clear()
+        self.kwargs.clear()
+
     def top_to_stack(self):
-        return Stack([self[-1]])
+        try:
+            return Stack([self[-1]])
+        except IndexError:
+            return Stack([])
 
     def take_n_to_stack(self, n):
         return self[:-n].copy()
@@ -63,7 +77,7 @@ def negate(stack):
 
     Examples
     --------
-    < 1 negate println
+    « 1 negate println
     -1
     """
     stack[-1] = -stack[-1]
@@ -79,9 +93,9 @@ def plus(stack):
 
     Examples
     --------
-    < 1 1 + println
+    « 1 1 + println
     2
-    < [1 2] [3] + println
+    « [1 2] [3] + println
     [1, 2, 3]
     """
     stack[-2] = stack[-2] + stack[-1]
@@ -119,9 +133,9 @@ def mul(stack):
 
     Examples
     --------
-    < 2 3 * println
+    « 2 3 * println
     6
-    < [1] 3 * println
+    « [1] 3 * println
     [1, 1, 1]
     """
     stack[-2] = stack[-2] * stack[-1]
@@ -261,6 +275,18 @@ def xor(stack):
 
 
 #---------------------------------------------------------------------------
+#                    Python Function Argument Operators
+#---------------------------------------------------------------------------
+
+def append_args(stack):
+    stack.args.append(stack.pop())
+
+
+def append_kwargs(stack):
+    stack.kwargs.update(stack.pop())
+
+
+#---------------------------------------------------------------------------
 #                            Python Builtins
 #---------------------------------------------------------------------------
 
@@ -372,6 +398,10 @@ def tuck(stack):
     stack.insert(-2, foo[-1])
 
 
+#---------------------------------------------------------------------------
+#                             Types and Casting
+#---------------------------------------------------------------------------
+
 def cast_bool(stack):
     """( a -- ? )"""
     stack[-1] = bool(stack[-1])
@@ -391,6 +421,10 @@ def cast_str(stack):
     """( a -- s )"""
     stack[-1] = str(stack[-1])
 
+
+#---------------------------------------------------------------------------
+#                                Printing
+#---------------------------------------------------------------------------
 
 def input_(stack):
     """(  -- s )"""
@@ -427,6 +461,18 @@ def print_stack(stack):
             print(' - {0:10} : {1}'.format(name, s))
 
 
+#---------------------------------------------------------------------------
+#                            Data Structures
+#---------------------------------------------------------------------------
+
+def set_(stack):
+    stack[-1] = set(stack[-1])
+
+
+def tuple_(stack):
+    stack[-1] = tuple(stack[-1])
+
+
 def list_(stack):
     """( a -- [a] )"""
     stack[-1] = list([stack[-1]])
@@ -453,26 +499,6 @@ def listn(stack):
     quote = list(stack.pop() for _ in range(n))
     quote.reverse()
     stack.push(quote)
-
-
-def eval_(stack):
-    """( [..] -- .. )"""
-    stack.call_quote(stack.pop())
-
-
-def error(stack):
-    """( -- ! )"""
-    raise RaisedError("Raised an explicit error.")
-
-
-def assert_(stack):
-    """( ? -- !|None )"""
-    assert stack.pop()
-
-
-def dump(stack):
-    """( .. --  )"""
-    stack.clear()
 
 
 def append(stack):
@@ -510,6 +536,34 @@ def range_(stack):
         range_iter = range(value)
     stack[-1] = range_iter
 
+
+#---------------------------------------------------------------------------
+#                            Data Structures
+#---------------------------------------------------------------------------
+
+def exec_(stack):
+    """( [..] -- .. )"""
+    stack.call_quote(stack.pop())
+
+
+def error(stack):
+    """( -- ! )"""
+    raise RaisedError("Raised an explicit error.")
+
+
+def assert_(stack):
+    """( ? -- !|None )"""
+    assert stack.pop()
+
+
+def dump(stack):
+    """( .. --  )"""
+    stack.clear()
+
+
+#---------------------------------------------------------------------------
+#                 Higher-order Functions and Combinators
+#---------------------------------------------------------------------------
 
 def map_(stack):
     """( [a ..] -- [f(a) ..] )"""
@@ -675,19 +729,12 @@ def unless(stack):
         stack.call_quote(false_clause)
 
 
-def pyeval(stack):
-    stack[-1] = eval(stack[-1], PYLOCALS)
-
-
-def pyexec(stack):
-    exec(stack.pop(), PYLOCALS)
-
-
-def pylocals(stack):
-    for k, v in PYLOCALS.items():
-        if k == '__builtins__':
-            continue
-        print(k, '=', v)
+def cond(stack):
+    pred_expr_pairs = stack.pop()
+    for pred, expr in pred_expr_pairs:
+        if stack.apply_to_top(pred):
+            stack.call_quote(expr)
+            break
 
 
 def slice_(stack):
@@ -727,107 +774,125 @@ def return_(stack):
     raise WordReturn
 
 
+def pyeval(stack):
+    stack[-1] = eval(stack[-1], stack.pylocals)
+
+
+def pyexec(stack):
+    exec(stack.pop(), stack.pylocals)
+
+
+def print_pylocals(stack):
+    for k, v in stack.pylocals.items():
+        if k == '__builtins__':
+            continue
+        print(k, '=', v)
+
+
 def exit(stack):
     sys.exit(0)
 
 
 BUILTINS = {
-    'nop':      nop,
-    'negate':   negate,
+    '!=':       ne,
+    '%':        mod,
+    '&':        bit_and,
+    '*':        mul,
+    '**':       power,
     '+':        plus,
     '++':       increment,
     '-':        minus,
     '--':       decrement,
     '/':        div,
     '//':       floor_div,
-    '*':        mul,
-    '**':       power,
-    '%':        mod,
-    '==':       eq,
-    '!=':       ne,
-    '>':        gt,
     '<':        lt,
-    '>=':       ge,
-    '<=':       le,
-    '~':        bit_not,
-    '&':        bit_and,
-    '|':        bit_or,
-    '^':        bit_xor,
     '<<':       bit_lshift,
+    '<=':       le,
+    '==':       eq,
+    '>':        gt,
+    '>*':       append_args,
+    '>**':      append_kwargs,
+    '>=':       ge,
     '>>':       bit_rshift,
-    'not':      not_,
-    'and':      and_,
-    'or':       or_,
-    'xor':      xor,
+    '^':        bit_xor,
     'abs':      abs_,
     'all':      all_,
+    'and':      and_,
     'any':      any_,
+    'append':   append,
     'ascii':    ascii_,
+    'assert':   assert_,
+    'assign':   set_to,
+    'bi':       bi,
     'bin':      bin_,
+    'bool':     cast_bool,
+    'choice':   choice,
     'chr':      chr_,
-    'hash':     hash_,
-    'len':      len_,
-    'max':      max_,
-    'min':      min_,
-    'repr':     repr_,
-    'sum':      sum_,
+    'cleave':   cleave,
+    'cond':     cond,
+    'dip':      dip,
     'drop':     drop,
     'drop2':    drop2,
+    'dump':     dump,
     'dup':      dup,
-    'swap':     swap,
-    'over':     over,
-    'rollup':   rollup,
-    'rolldown': rolldown,
-    'rotate':   rotate,
-    'nip':      nip,
-    'tuck':     tuck,
-    'bool':     cast_bool,
-    'int':      cast_int,
+    'error':    error,
+    'exec':     exec_,
+    'exit':     exit,
+    'extend':   extend,
+    'filter':   filter_,
     'float':    cast_float,
-    'str':      cast_str,
+    'fold':     fold,
+    'foreach':  foreach,
+    'get':      get_from,
+    'hash':     hash_,
+    'help':     help_,
+    'if':       if_,
     'input':    input_,
-    'print':    print_,
-    'println':  println,
-    'stack':    print_stack,
+    'int':      cast_int,
+    'keep':     keep,
+    'len':      len_,
+    'linrec':   linrec,
     'list':     list_,
     'list2':    list2,
     'list3':    list3,
     'listn':    listn,
-    'eval':     eval_,
-    'error':    error,
-    'assert':   assert_,
-    'dump':     dump,
-    'append':   append,
-    'extend':   extend,
-    'prepend':  prepend,
-    'range':    range_,
     'map':      map_,
-    'filter':   filter_,
-    'fold':     fold,
-    'dip':      dip,
-    'keep':     keep,
-    'bi':       bi,
-    'tri':      tri,
-    'cleave':   cleave,
-    'linrec':   linrec,
-    'while':    while_,
-    'foreach':  foreach,
-    'repeat':   repeat,
-    'choice':   choice,
-    'if':       if_,
-    'when':     when,
-    'unless':   unless,
+    'max':      max_,
+    'min':      min_,
+    'negate':   negate,
+    'nip':      nip,
+    'nop':      nop,
+    'not':      not_,
+    'or':       or_,
+    'over':     over,
+    'prepend':  prepend,
+    'print':    print_,
+    'println':  println,
     'pyeval':   pyeval,
     'pyexec':   pyexec,
-    'pylocals': pylocals,
-    'slice':    slice_,
-    'get':      get_from,
-    'set':      set_to,
-    #'try':      try_,
-    'help':     help_,
+    'pylocals': print_pylocals,
+    'range':    range_,
+    'repeat':   repeat,
+    'repr':     repr_,
     'return':   return_,
-    'exit':     exit,
-    #'debug':    debug,
+    'rolldown': rolldown,
+    'rollup':   rollup,
+    'rotate':   rotate,
+    'set':      set_,
+    'slice':    slice_,
+    'stack':    print_stack,
+    'str':      cast_str,
+    'sum':      sum_,
+    'swap':     swap,
+    'tri':      tri,
+    'tuck':     tuck,
+    'tuple':    tuple_,
+    'unless':   unless,
+    'when':     when,
+    'while':    while_,
+    'xor':      xor,
+    '|':        bit_or,
+    '~':        bit_not,
 }
 
 

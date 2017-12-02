@@ -1,21 +1,12 @@
 import os
 import copy
-import warnings
-from collections import Iterable
 
 from lark import Lark, Transformer, Tree
 from lark.lexer import Token
 
+from . import array_module
 from .stack import BUILTINS, Stack, WordReturn
-
-
-warnings.simplefilter('default')
-try:
-    import numpy as array_module
-except ImportError:
-    array_module = None
-    msg = 'Module "numpy" not found, array "@" literals will not be supported'
-    warnings.warn(msg, ImportWarning)
+from .wrappers import EmptyNode, ArrayWr, CallWr, CallWr, VarWr, WordWr
 
 
 LIB_PATH = '/home/brian/code/bok/lib'
@@ -61,107 +52,6 @@ def scope_words(tree, scope=None, words=None):
             scope.pop()
 
 
-class ReprWrapper:
-    repr_fmt = '<{0}>'
-
-    def __repr__(self):
-        return self.repr_fmt.format(self.__name__)
-
-
-class ArrayWrapper(ReprWrapper):
-    repr_fmt = '<@{0}>'
-
-    def __init__(self, obj):
-        self.obj = obj
-        self.__name__ = obj.__name__
-        self.__doc__ = obj.__doc__
-
-    def __call__(self, stack):
-        top = stack[-1]
-        if isinstance(top, array_module.ndarray):
-            stack[-1] = self.obj(top)
-        elif not isinstance(top, Iterable):
-            stack[-1] = self.obj(top)
-        else:
-            stack[-1] = self.obj(*top)
-
-
-class CallWrapper(ReprWrapper):
-    def __init__(self, name, words):
-        self.name = name
-        self.__name__ = name
-        self.words = words
-
-    def __call__(self, stack):
-        return self.words[self.name](stack)
-
-    @property
-    def __doc__(self):
-        return self.words[self.name].__doc__
-
-
-class VarWrapper:
-    repr_fmt = '<:{0}>'
-
-    def __init__(self, name):
-        self.__name__ = name
-        self.val = None
-
-    def new(self, stack):
-        self.val = stack.pop()
-
-    def clear(self):
-        self.val = None
-
-    def __call__(self, stack):
-        stack.push(self.val)
-
-
-class EmptyNode:
-    pass
-
-
-def filter_word_defs(ops):
-    return [
-        op for op in ops
-        if op is not EmptyNode
-    ]
-
-
-class WordWrapper(ReprWrapper):
-    def __init__(self, name, ops, doc):
-        self.__doc__ = doc
-        self.__name__ = name
-        self.ops = filter_word_defs(ops)
-        self.vars = self._get_vars()
-
-    def _get_vars(self):
-        """
-        The method `.new` of an instance of VarWrapper is actually the op
-        that's in the list, but we want the instance itself.
-        """
-        return set(
-            op.__self__ for op in self.ops
-            if hasattr(op, '__self__') and isinstance(op.__self__, VarWrapper)
-        )
-
-    def _clear_vars(self):
-        for var in self.vars:
-            var.clear()
-
-    def __call__(self, stack):
-        try:
-            for op in self.ops:
-                if callable(op):
-                    op(stack)
-                else:
-                    stack.append(op)
-        except WordReturn:
-            pass
-        if self.vars:
-            self._clear_vars()
-
-
 class ReduceTree(Transformer):
     def __init__(self, words, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -176,23 +66,38 @@ class ReduceTree(Transformer):
     def operator(self, tree):
         return self.words[tree[0]]
 
-    def true_(self, tree):
+    def true(self, tree):
         return True
 
-    def false_(self, tree):
+    def false(self, tree):
         return False
 
-    def none_(self, tree):
+    def none(self, tree):
         return None
 
     def list(self, tree):
         return list(tree)
 
+    def tuple(self, tree):
+        return tuple(tree[0])
+
+    def set(self, tree):
+        return set(tree[0])
+
+    def dict(self, tree):
+        return dict(tree[0])
+
     def array(self, tree):
+        return array_module.array(tree)
+
+    def arrcall(self, tree):
         obj = array_module
         for child in tree:
             obj = getattr(obj, child)
-        return ArrayWrapper(obj)
+        if callable(obj):
+            return ArrayWr(obj)
+        else:
+            return obj
 
     def dot(self, tree):
         name = '.'.join(tree)
@@ -203,14 +108,14 @@ class ReduceTree(Transformer):
         if name in self.words:
             return self.words[name]
         else:
-            return CallWrapper(name, self.words)
+            return CallWr(name, self.words)
 
     def var(self, tree):
         name = tree[0].value
         if name in self.words:
             vw = self.words[name]
         else:
-            vw = VarWrapper(name)
+            vw = VarWr(name)
             self.words[name] = vw
         return vw.new
 
@@ -223,7 +128,7 @@ class ReduceTree(Transformer):
         except (AssertionError, AttributeError, IndexError):
             doc = None
             ops = tree[1:]
-        self.words[name] = WordWrapper(name, ops, doc)
+        self.words[name] = WordWr(name, ops, doc)
         return EmptyNode
 
     def import_(self, tree):
@@ -253,7 +158,7 @@ def parse_text(text, words):
     scope_words(tree)
     dctree = copy.deepcopy(tree)
     code = ReduceTree(words).transform(dctree).children
-    code = filter_word_defs(code)
+    code = [op for op in code if op is not EmptyNode]
     return code
 
 
